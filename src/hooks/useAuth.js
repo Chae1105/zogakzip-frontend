@@ -53,8 +53,7 @@ export const useAuth = () => {
 
   const login = async (email, password) => {
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      return result;
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
       console.log("Firebase 원본 에러: ", err.code, err.message);
       throw new Error(getKoreanErrorMessage(err.code));
@@ -63,12 +62,7 @@ export const useAuth = () => {
 
   const signup = async (email, password) => {
     try {
-      const result = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      return result;
+      await createUserWithEmailAndPassword(auth, email, password);
     } catch (err) {
       console.log("Firebase 원본 에러: ", err.code, err.message);
       throw new Error(getKoreanErrorMessage(err.code));

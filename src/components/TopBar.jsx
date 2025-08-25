@@ -11,7 +11,7 @@ function TopBar() {
     return (
       <nav className="top-bar">
         <div className="nav-brand">
-          <Link to="/">My App</Link>
+          <Link to="/">Logo</Link> {/* 로고 클릭 시 메인페이지로 이동하도록 */}
         </div>
         <div className="nav-auth">로딩 중...</div>
       </nav>
@@ -21,7 +21,7 @@ function TopBar() {
   return (
     <nav className="top-bar">
       <div className="nav-brand">
-        <Link to="/">My App</Link>
+        <Link to="/">Logo</Link> {/* 로고 클릭 시 메인페이지로 이동하도록 */}
       </div>
 
       <div className="nav-auth">
