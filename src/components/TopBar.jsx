@@ -28,6 +28,7 @@ function TopBar() {
         {user ? (
           <div>
             <span>안녕하세요, {user.email.split("@")[0]}님!</span>
+            <Link to="/mypage">마이페이지(top)</Link>
             <LogoutButton className="logout-btn" />
           </div>
         ) : (
