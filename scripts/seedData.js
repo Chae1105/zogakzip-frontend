@@ -10,7 +10,7 @@ import {
 import dotenv from "dotenv";
 dotenv.config();
 
-const firebaseConfig = {
+const firebaseConfigInScript = {
   apiKey: process.env.VITE_API_KEY,
   authDomain: process.env.VITE_AUTH_DOMAIN,
   projectId: process.env.VITE_PROJECT_ID,
@@ -20,14 +20,21 @@ const firebaseConfig = {
   measurementId: process.env.VITE_MEASUREMENT_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const appInScript = initializeApp(firebaseConfigInScript);
+const dbInScript = getFirestore(appInScript);
 
-const addCollectionAndDoc = async () => {
+const addInitialGroup1 = async () => {
   try {
-    const docRef = await addDoc(collection(db, "users"), {
-      name: "kim",
-      born: 1123,
+    const docRef = await addDoc(collection(dbInScript, "groups"), {
+      groupName: "firstGroup",
+      groupPassword: "firstpassword",
+      imageUrl: "string",
+      isPublic: true,
+      introduction: "초기 그룹 데이터 추가용",
+      members: ["firstUser"],
+      likeCount: 0,
+      postCount: 0,
+      createaAt: "2025-08-26",
     });
     console.log("Document written with ID: ", docRef.id);
   } catch (e) {
@@ -35,4 +42,24 @@ const addCollectionAndDoc = async () => {
   }
 };
 
-addCollectionAndDoc();
+const addInitialGroup2 = async () => {
+  try {
+    const docRef = await addDoc(collection(dbInScript, "groups"), {
+      groupName: "secondGroup",
+      groupPassword: "secondpassword",
+      imageUrl: "string",
+      isPublic: true,
+      introduction: "초기 그룹 데이터 추가용222",
+      members: ["secondUser"],
+      likeCount: 0,
+      postCount: 0,
+      createaAt: "2025-08-26",
+    });
+    console.log("Document written with ID: ", docRef.id);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+};
+
+addInitialGroup1();
+addInitialGroup2();

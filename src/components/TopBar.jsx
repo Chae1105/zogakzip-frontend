@@ -5,7 +5,7 @@ import LogoutButton from "./LogoutButton";
 
 function TopBar() {
   const { user, loading } = useAuth();
-
+  console.log(user);
   // 로딩 중일 때는 빈 상태로 표시
   if (loading) {
     return (
