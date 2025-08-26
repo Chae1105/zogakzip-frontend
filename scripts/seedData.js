@@ -34,7 +34,7 @@ const addInitialGroup1 = async () => {
       members: ["firstUser"],
       likeCount: 0,
       postCount: 0,
-      createaAt: "2025-08-26",
+      createdAt: "2025-08-26",
     });
     console.log("Document written with ID: ", docRef.id);
   } catch (e) {
@@ -53,7 +53,7 @@ const addInitialGroup2 = async () => {
       members: ["secondUser"],
       likeCount: 0,
       postCount: 0,
-      createaAt: "2025-08-26",
+      createdAt: "2025-08-26",
     });
     console.log("Document written with ID: ", docRef.id);
   } catch (e) {
