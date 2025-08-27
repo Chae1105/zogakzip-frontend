@@ -1,4 +1,5 @@
 import { db } from "../firebase";
+import { auth } from "../firebase"; // 회원만 그룹 생성 가능하도록 제한
 import { collection, getDocs } from "firebase/firestore";
 import GroupCard from "../components/GroupCard";
 import { useEffect, useState } from "react";
@@ -29,13 +30,20 @@ function GroupListPage() {
 
   if (loading) return <div>로딩 중...</div>;
 
+  const handleClickCreate = () => {
+    if (auth.currentUser === null) {
+      alert("회원만 가능한 기능입니다!");
+      navigate("/");
+    } else navigate("/createGroup");
+  };
+
   return (
     <div>
       <h1>그룹 목록 페이지</h1>
-      <button className="bg-pink-300" onClick={() => navigate("/createGroup")}>
+      <button className="bg-pink-300" onClick={handleClickCreate}>
         그룹 생성하기
       </button>
-      <div>
+      <div className="flex">
         {groups.map((group) => (
           <GroupCard key={group.groupId} groupInfo={group} />
         ))}
