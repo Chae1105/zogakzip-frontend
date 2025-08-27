@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import GroupDetailPage from "./pages/GroupDetailPage";
 import GroupListPage from "./pages/GroupListPage";
+import CreateGroupPage from "./pages/CreateGroupPage";
 
 function App() {
   return (
@@ -22,6 +23,8 @@ function App() {
 
             <Route path="/groups" element={<GroupListPage />} />
             <Route path="/groups/:groupId" element={<GroupDetailPage />} />
+
+            <Route path="/createGroup" element={<CreateGroupPage/>}/>
           </Routes>
         </div>
       </Router>
