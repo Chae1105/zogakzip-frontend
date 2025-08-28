@@ -15,8 +15,8 @@ import {
   getDocs,
   setDoc,
   deleteDoc,
+  serverTimestamp,
 } from "firebase/firestore";
-import dayjs from "dayjs";
 
 export const createGroup = async (groupData) => {
   try {
@@ -24,11 +24,23 @@ export const createGroup = async (groupData) => {
       ...groupData,
       likeCount: 0,
       postCount: 0,
-      createdAt: dayjs().format("YYYY-MM-DD"),
+      createdAt: serverTimestamp(), // Firestore가 저장 순간의 서버 시간을 넣어줌
     });
     return result;
   } catch (err) {
     console.error("그룹 생성 실패: ", err);
+  }
+};
+
+export const updateGroup = async (groupData, groupId) => {
+  try {
+    console.log("수정시작", groupId);
+    const result = await setDoc(doc(db, "groups", groupId), groupData, {
+      merge: true,
+    });
+    return result;
+  } catch (err) {
+    console.error("그룹 정보 수정 실패: ", err);
   }
 };
 

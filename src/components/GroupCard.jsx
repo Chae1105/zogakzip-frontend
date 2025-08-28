@@ -11,7 +11,11 @@ function GroupCard({ groupInfo }) {
 
   return (
     <div onClick={navigateToDetail}>
-      <img src={groupInfo.imageUrl || defaultImg} alt="그룹 대표 이미지" />
+      <img
+        src={groupInfo.imageUrl || defaultImg}
+        alt="그룹 대표 이미지"
+        className="w-32 h-32 object-contain"
+      />
       <h2>{groupInfo.groupName}</h2>
       <h3>{groupInfo.introduction}</h3>
     </div>
