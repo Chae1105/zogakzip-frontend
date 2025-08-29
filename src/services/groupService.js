@@ -17,7 +17,9 @@ import {
   deleteDoc,
   serverTimestamp,
 } from "firebase/firestore";
+import { deleteImage } from "./fileService";
 
+// 그룹 생성
 export const createGroup = async (groupData) => {
   try {
     const result = await addDoc(collection(db, "groups"), {
@@ -29,19 +31,56 @@ export const createGroup = async (groupData) => {
     return result;
   } catch (err) {
     console.error("그룹 생성 실패: ", err);
+    throw err;
   }
 };
 
+// 그룹 상세 정보 불러오기
+export const fetchGroupDetail = async (groupId) => {
+  try {
+    const groupDoc = await getDoc(doc(db, "groups", groupId));
+    if (!groupDoc.exists()) {
+      throw new Error("해당 그룹을 찾을 수 없습니다.");
+    }
+    const groupData = groupDoc.data();
+    console.log("그룹 정보: ", groupData);
+
+    return groupData;
+  } catch (err) {
+    console.error("그룹 불러오기 실패: ", err);
+    throw err;
+  }
+};
+
+// 그룹 수정
 export const updateGroup = async (groupData, groupId) => {
   try {
-    console.log("수정시작", groupId);
+    console.log("수정시작: ", groupId);
     const result = await setDoc(doc(db, "groups", groupId), groupData, {
       merge: true,
     });
     return result;
   } catch (err) {
     console.error("그룹 정보 수정 실패: ", err);
+    throw err;
   }
 };
 
 // setDoc(cityRef, { capital: true, likeCount: 3 }, { merge: true });
+
+// 그룹 삭제 - deleteDoc(doc(db, "cities", "DC"));
+export const deleteGroup = async (groupId, inputPassword, groupData) => {
+  try {
+    if (inputPassword !== groupData.groupPassword) {
+      throw new Error("비밀번호가 일치하지 않습니다.");
+    }
+
+    // 그룹 이미지가 있으면 storage에서 해당 파일 삭제
+    if (groupData.imageUrl) await deleteImage(groupData.imageUrl);
+    await deleteDoc(doc(db, "groups", groupId)); // deletDoc이 undefined를 반환함
+    return true; // 삭제 성공 시 true 반환하도록
+  } catch (err) {
+    console.error("그룹 삭제 실패: ", err);
+    throw err;
+  }
+};

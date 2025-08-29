@@ -34,8 +34,8 @@ function CreateGroupPage() {
 
       const response = await createGroup(groupData);
       if (response) {
-        console.log("그룹 생성 완료");
-        navigate("/");
+        alert("그룹 생성 완료!");
+        navigate("/groups");
       } else {
         alert("그룹 생성에 실패했습니다. 다시 시도해주세요.");
       }

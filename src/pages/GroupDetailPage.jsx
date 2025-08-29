@@ -4,6 +4,8 @@ import { db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
+import DeleteModal from "../components/DeleteModal";
+import { fetchGroupDetail } from "../services/groupService";
 
 function GroupDetailPage() {
   //const groupId = useParams().groupId;
@@ -11,7 +13,8 @@ function GroupDetailPage() {
 
   const [group, setGroup] = useState({});
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // 날짜 포맷용 함수
   const formatCreatedAt = (createdAt) => {
@@ -22,18 +25,11 @@ function GroupDetailPage() {
     return createdAt; // 이미 포맷이 된 형태라면 그냥 리턴
   };
 
+  // 상세 페이지 렌더링 - 여기 fetch 함수 모듈화/공통 함수 유틸화
   useEffect(() => {
-    async function fetchGroupDetail() {
+    async function fetchGroupData() {
       try {
-        console.log("가져올 그룹 ID: ", groupId);
-
-        const groupDoc = await getDoc(doc(db, "groups", groupId)); // groupId 문서의 데이터만 받아오기
-
-        if (!groupDoc.exists()) {
-          console.error("해당 그룹을 찾을 수 없습니다.");
-          return;
-        }
-        const groupData = groupDoc.data();
+        const groupData = await fetchGroupDetail(groupId);
         setGroup(groupData);
         console.log("그룹 정보: ", groupData);
       } catch (err) {
@@ -45,15 +41,27 @@ function GroupDetailPage() {
 
     // 그룹Id 있는지 확실하게 확인 후 해당 그룹 데이터 가져오기
     if (groupId) {
-      fetchGroupDetail();
+      fetchGroupData();
     }
   }, [groupId]);
 
+  /* 
   // 수정 모달창 닫은 후 데이터 새로고침 하기 위해
-  const handleModalClose = () => {
-    setIsModalOpen(false);
+  const handleUpdateModalClose = () => {
+    setIsUpdateModalOpen(false);
 
     // 모달창 닫히면 그룹 데이터 다시 불러오기
+    
+    if (groupId) {
+      fetchGroupDetail();
+    }
+    
+  };
+
+  // 삭제 모달창 닫기
+  const handleDeleteModalClose = () => {
+    setIsDeleteModalOpen(false);
+
     if (groupId) {
       fetchGroupDetail();
     }
@@ -72,21 +80,12 @@ function GroupDetailPage() {
       }
       const groupData = groupDoc.data();
 
-      let createDate = "정보 없음";
-      if (groupData.createdAt) {
-        createDate = dayjs(groupData.createdAt.toDate()).format("YYYY-MM-DD");
-      }
-
-      const processedGroupData = {
-        ...groupData,
-        createdAt: createDate,
-      };
-
-      setGroup(processedGroupData);
+      setGroup(groupData);
     } catch (err) {
       console.error("그룹 정보 불러오기 실패:  ", err);
     }
-  };
+  }; 
+   */
 
   if (loading) return <div>로딩 중...</div>;
 
@@ -114,16 +113,34 @@ function GroupDetailPage() {
         <p>게시글 수: {group.postCount || 0}</p>
       </div>
 
-      <button className="bg-pink-500" onClick={() => setIsModalOpen(true)}>
+      <button
+        className="bg-pink-500"
+        onClick={() => setIsUpdateModalOpen(true)}
+      >
         그룹 수정
       </button>
+      <button
+        className="bg-yellow-500"
+        onClick={() => setIsDeleteModalOpen(true)}
+      >
+        그룹 삭제
+      </button>
 
-      {isModalOpen && (
+      {isUpdateModalOpen && (
         <GroupUpdateModal
           group={group}
           groupId={groupId}
-          isOpen={isModalOpen}
-          onClose={handleModalClose}
+          isOpen={isUpdateModalOpen}
+          onClose={() => setIsUpdateModalOpen(false)}
+        />
+      )}
+      {isDeleteModalOpen && (
+        <DeleteModal
+          groupData={group}
+          mode="그룹"
+          docId={groupId}
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
         />
       )}
     </div>
