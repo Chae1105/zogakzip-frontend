@@ -1,6 +1,10 @@
 import React from "react";
+import { useState } from "react";
+import { fetchUserDetail } from "../services/userService";
 
 function MyPage() {
+  
+
   return (
     <div>
       <h2>마이페이지</h2>

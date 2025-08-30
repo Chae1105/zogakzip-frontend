@@ -54,6 +54,8 @@ export const useAuth = () => {
   const login = async (email, password) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      const userId = auth.currentUser?.uid;
+      return userId; // 유저ID 넘겨주기
     } catch (err) {
       console.log("Firebase 원본 에러: ", err.code, err.message);
       throw new Error(getKoreanErrorMessage(err.code));
@@ -63,6 +65,8 @@ export const useAuth = () => {
   const signup = async (email, password) => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+      const userId = auth.currentUser?.uid;
+      return userId;
     } catch (err) {
       console.log("Firebase 원본 에러: ", err.code, err.message);
       throw new Error(getKoreanErrorMessage(err.code));

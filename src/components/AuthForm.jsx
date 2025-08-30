@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom"; // 로그인/회원가입 성공 후 메인 페이지 이동 위해
+import { createUser } from "../services/userService";
 
 // 로그인+회원가입 폼, mode prop으로 로그인/회원가입 기능 구분
 function AuthForm({ mode = "login" }) {
@@ -16,7 +17,6 @@ function AuthForm({ mode = "login" }) {
   // loading과 disabled -> 로그인/회원가입 버튼을 중복해서 누르지 않게 하기 위해
   // 사용자 버튼 여러번 클릭 -> 중복 요청 발생 -> '처리중..' 표시 없으면 답답해함
   // disabled : 버튼 클릭 불가 -> 중복 요청 방지, 입력 필드 비활성화 -> 처리 중 데이터 변경 방지
-
   const isSignupMode = mode === "signup"; // 회원가입 모드로 설정할 때
 
   const handleSubmit = async (e) => {
@@ -31,10 +31,19 @@ function AuthForm({ mode = "login" }) {
       return;
     }
 
+    const userData = {
+      email,
+      password,
+    };
+
     try {
       if (isSignupMode) {
-        await signup(email, password);
+        const userId = await signup(email, password);
+
         console.log("회원가입 성공!");
+
+        await createUser(userId, userData);
+
         navigate("/"); // 메인 페이지로 이동
       } else {
         await login(email, password);
