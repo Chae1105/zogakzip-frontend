@@ -11,6 +11,7 @@ function GroupListPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // 그룹 전체 목록 불러오는거라서 groupService에 함수 정의 안 함
     async function fetchGroups() {
       try {
         const allGroups = await getDocs(collection(db, "groups")); // groups 컬렉션의 전체 데이터 다 받아오기

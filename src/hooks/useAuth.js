@@ -66,6 +66,7 @@ export const useAuth = () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       const userId = auth.currentUser?.uid;
+      console.log("회원가입, userID: ", userId);
       return userId;
     } catch (err) {
       console.log("Firebase 원본 에러: ", err.code, err.message);
