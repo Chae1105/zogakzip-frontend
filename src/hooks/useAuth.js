@@ -48,7 +48,7 @@ export const useAuth = () => {
       setUser(user);
       setLoading(false); // 인증 상태 확인 완료
     });
-    return unsubscribe;
+    return () => unsubscribe;
   }, []);
 
   const login = async (email, password) => {
