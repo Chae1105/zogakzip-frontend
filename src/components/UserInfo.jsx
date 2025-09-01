@@ -148,7 +148,7 @@ function UserInfo({ userId }) {
         email,
         password,
         userName,
-        imageUrl,
+        imageUrl: newImageUrl,
       };
 
       console.log("업데이트 할 데이터: ", userData);
