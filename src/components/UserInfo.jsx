@@ -14,6 +14,10 @@ function UserInfo({ userId }) {
   const [isImageUploading, setIsImageUploading] = useState(false); // 이미지 파일 업로드
   const [isUpdating, setIsUpdating] = useState(false); // 수정 상태 확인
 
+  // 이미지 미리보기 URL과 선택된 파일 객체를 위한 상태
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+
   useEffect(() => {
     console.log("useEffect 실행");
     async function fetchUserData() {
@@ -37,7 +41,33 @@ function UserInfo({ userId }) {
       fetchUserData();
       console.log("fetchUserData 함수 실행 후");
     }
-  }, []);
+
+    // 이미지 미리보기 관련-추가
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [userId, previewUrl]);
+
+  // handleUploadImage 함수를 변경하기 위한 함수
+  // Firebase에 바로 업로드하지 않고, 미리보기 기능만 수행하도록
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("파일 크기는  5MB 이하여야 합니다. 다시 시도해주세요.");
+      return;
+    }
+
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
 
   // 이미지 파일 업로드
   const handleUploadImage = async (e) => {
@@ -98,7 +128,22 @@ function UserInfo({ userId }) {
 
     setIsUpdating(true);
 
+    // 미리보기 관련- 추가
+    let newImageUrl = imageUrl;
+
     try {
+      // 이미지 미리보기 관련- 추가부분
+      if (selectedFile) {
+        // 기존 이미지 삭제 로직
+        if (imageUrl) {
+          await deleteImage(imageUrl);
+          console.log("기존 이미지 삭제 완료");
+        }
+
+        newImageUrl = await uploadImage(selectedFile, "users");
+        setImageUrl(newImageUrl);
+        console.log("새 이미지 업로드 완료");
+      }
       const userData = {
         email,
         password,
@@ -136,15 +181,16 @@ function UserInfo({ userId }) {
             <div className="flex-row">
               <div className="flex-col">
                 <div>
+                  {/* 수정: 미리보기 URL 있으면 그걸, 없으면 기존 URL 사용 */}
                   <img
-                    src={user.imageUrl || null}
+                    src={previewUrl || user.imageUrl || null}
                     alt="프로필 이미지"
                     className="w-50 h-50"
                   />
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={handleUploadImage}
+                    onChange={handleFileChange} // 수정: handleUploadImage -> handleFileChange
                     disabled={isImageUploading}
                   />
                   {/* 사용자에게 진행상황 보여주기 */}
