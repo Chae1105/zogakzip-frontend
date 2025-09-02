@@ -178,7 +178,7 @@ function UserInfo({ userId, userInfo }) {
 
       await withDraw(inputPassword, user);
       alert("회원탈퇴가 완료되었습니다!");
-      
+
       navigate("/");
     } catch (err) {
       alert(err.message);
