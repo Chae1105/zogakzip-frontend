@@ -4,12 +4,13 @@ import { auth } from "../firebase";
 import { deleteImage, uploadImage } from "../services/fileService";
 import React from "react";
 
-function UserInfo({ userId }) {
+function UserInfo({ userId, userData }) {
+  console.log("UserInfo, userData: ", userData);
   const [user, setUser] = useState();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState();
+  const [password, setPassword] = useState();
+  const [imageUrl, setImageUrl] = useState();
+  const [userName, setUserName] = useState();
 
   const [isImageUploading, setIsImageUploading] = useState(false); // 이미지 파일 업로드
   const [isUpdating, setIsUpdating] = useState(false); // 수정 상태 확인
@@ -18,37 +19,27 @@ function UserInfo({ userId }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
+  // userData 업데이트 관련 useEffect
   useEffect(() => {
-    console.log("useEffect 실행");
-    async function fetchUserData() {
-      try {
-        console.log("함수 정의 부분 들어옴");
-        const userData = await fetchUserDetail(userId);
-        setUser(userData);
-        console.log("유저 데이터: ", userData);
-        setEmail(userData.email);
-        setPassword(userData.password);
-        setImageUrl(userData.imageUrl);
-        setUserName(userData.userName);
-      } catch (err) {
-        console.error("유저 정보 불러오기 실패: ", err);
-      }
+    console.log("첫 번째 useEffect 실행");
+    if (userData) {
+      setUser(userData);
+      setEmail(userData.email || "");
+      setPassword(userData.password || "");
+      setImageUrl(userData.imageUrl || "");
+      setUserName(userData.userName || "");
     }
+  }, [userData]);
 
-    console.log("userId 있는지 확인하기");
-    if (userId) {
-      console.log("fetchUserData 함수 실행 전");
-      fetchUserData();
-      console.log("fetchUserData 함수 실행 후");
-    }
-
+  // 이미지 프리뷰 관련 useEffect
+  useEffect(() => {
     // 이미지 미리보기 관련-추가
     return () => {
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
       }
     };
-  }, [userId, previewUrl]);
+  }, [previewUrl]);
 
   // handleUploadImage 함수를 변경하기 위한 함수
   // Firebase에 바로 업로드하지 않고, 미리보기 기능만 수행하도록
