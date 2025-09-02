@@ -62,12 +62,8 @@ export const updateUser = async (userId, userData) => {
 };
 
 // 유저 정보 삭제
-export const deleteUser = async (userId, inputPassword, userData) => {
+export const deleteUserData = async (userId, userData) => {
   try {
-    if (inputPassword !== userData.password) {
-      throw new Error("비밀번호가 일치하지 않습니다.");
-    }
-
     // 유저 이미지가 있으면 storage에서 해당 파일 삭제
     if (userData.imageUrl) await deleteImage(userData.imageUrl);
     await deleteDoc(doc(db, "users", userId));

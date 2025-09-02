@@ -1,19 +1,32 @@
 import { useState, useEffect } from "react";
-import { fetchUserDetail, updateUser } from "../services/userService";
+import {
+  fetchUserDetail,
+  updateUser,
+  deleteUserData,
+} from "../services/userService";
 import { auth } from "../firebase";
 import { deleteImage, uploadImage } from "../services/fileService";
 import React from "react";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
-function UserInfo({ userId, userData }) {
-  console.log("UserInfo, userData: ", userData);
+function UserInfo({ userId, userInfo }) {
+  console.log("UserInfo, userData: ", userInfo);
   const [user, setUser] = useState();
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
-  const [imageUrl, setImageUrl] = useState();
-  const [userName, setUserName] = useState();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [userName, setUserName] = useState("");
 
   const [isImageUploading, setIsImageUploading] = useState(false); // 이미지 파일 업로드
   const [isUpdating, setIsUpdating] = useState(false); // 수정 상태 확인
+
+  // 회원탈퇴 관련
+  const { withDraw } = useAuth();
+  const [inputPassword, setInputPassword] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   // 이미지 미리보기 URL과 선택된 파일 객체를 위한 상태
   const [selectedFile, setSelectedFile] = useState(null);
@@ -22,14 +35,14 @@ function UserInfo({ userId, userData }) {
   // userData 업데이트 관련 useEffect
   useEffect(() => {
     console.log("첫 번째 useEffect 실행");
-    if (userData) {
-      setUser(userData);
-      setEmail(userData.email || "");
-      setPassword(userData.password || "");
-      setImageUrl(userData.imageUrl || "");
-      setUserName(userData.userName || "");
+    if (userInfo) {
+      setUser(userInfo);
+      setEmail(userInfo.email || "");
+      setPassword(userInfo.password || "");
+      setImageUrl(userInfo.imageUrl || "");
+      setUserName(userInfo.userName || "");
     }
-  }, [userData]);
+  }, [userInfo]);
 
   // 이미지 프리뷰 관련 useEffect
   useEffect(() => {
@@ -112,10 +125,12 @@ function UserInfo({ userId, userData }) {
       return;
     }
 
+    /*
     if (isImageUploading) {
       alert("이미지 업로드 진행 중.. 잠시 후 다시 시도해주세요!");
       return;
     }
+      */
 
     setIsUpdating(true);
 
@@ -142,9 +157,6 @@ function UserInfo({ userId, userData }) {
         imageUrl: newImageUrl,
       };
 
-      console.log("업데이트 할 데이터: ", userData);
-      console.log("유저 ID: ", userId);
-
       await updateUser(userId, userData);
       console.log("유저 정보 수정 완료");
       alert("유저 정보 수정 완료!");
@@ -156,6 +168,24 @@ function UserInfo({ userId, userData }) {
       alert("유저 정보 수정 실패. 다시 시도해주세요.");
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  // 유저 정보 삭제 (회원탈퇴)
+  const handleDeleteUser = async (e) => {
+    try {
+      setIsDeleting(true);
+
+      await withDraw(inputPassword, user);
+      alert("회원탈퇴가 완료되었습니다!");
+      
+      navigate("/");
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setIsDeleteModalOpen(false);
+      isDeleting(false);
+      setInputPassword("");
     }
   };
 
@@ -231,6 +261,37 @@ function UserInfo({ userId, userData }) {
               <p>이름 : {user.userName}</p>
               <p>이메일 : {user.email}</p>
               <p>비밀번호 : {user.password}</p>
+            </div>
+
+            <div>
+              <button
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="font-red-500"
+              >
+                회원탈퇴
+              </button>
+              {isDeleteModalOpen && (
+                <div className="modal">
+                  <p>회원탈퇴</p>
+                  <input
+                    type="password"
+                    value={inputPassword}
+                    onChange={(e) => setInputPassword(e.target.value)}
+                    placeholder="비밀번호를 입력해주세요"
+                  />
+                  <button
+                    onClick={() => {
+                      setInputPassword("");
+                      setIsDeleteModalOpen(false);
+                    }}
+                  >
+                    취소
+                  </button>
+                  <button onClick={handleDeleteUser} disabled={isDeleting}>
+                    {isDeleting ? "탈퇴 중..." : "탈퇴하기"}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

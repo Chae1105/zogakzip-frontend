@@ -47,7 +47,7 @@ function MyPage() {
         <h2>마이페이지</h2>
       </div>
 
-      <UserInfo userId={user.uid} userData={userData} />
+      <UserInfo userId={user.uid} userInfo={userData} />
     </div>
   );
 }
