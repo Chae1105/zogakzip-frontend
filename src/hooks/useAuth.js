@@ -5,7 +5,11 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
 } from "firebase/auth";
+import { deleteUserData } from "../services/userService";
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -48,12 +52,14 @@ export const useAuth = () => {
       setUser(user);
       setLoading(false); // 인증 상태 확인 완료
     });
-    return unsubscribe;
+    return () => unsubscribe;
   }, []);
 
   const login = async (email, password) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      const userId = auth.currentUser?.uid;
+      return userId; // 유저ID 넘겨주기
     } catch (err) {
       console.log("Firebase 원본 에러: ", err.code, err.message);
       throw new Error(getKoreanErrorMessage(err.code));
@@ -63,6 +69,9 @@ export const useAuth = () => {
   const signup = async (email, password) => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+      const userId = auth.currentUser?.uid;
+      console.log("회원가입, userID: ", userId);
+      return userId;
     } catch (err) {
       console.log("Firebase 원본 에러: ", err.code, err.message);
       throw new Error(getKoreanErrorMessage(err.code));
@@ -78,5 +87,26 @@ export const useAuth = () => {
     }
   };
 
-  return { user, loading, login, signup, logout };
+  const withDraw = async (inputPassword, userData) => {
+    try {
+      // 1) 최근 로그인 재인증 및 비밀번호 비교
+      const credential = EmailAuthProvider.credential(
+        auth.currentUser.email,
+        inputPassword
+      );
+      await reauthenticateWithCredential(auth.currentUser, credential);
+
+      // 2) Firestore + Storage 데이터 삭제
+      await deleteUserData(auth.currentUser.uid, userData);
+
+      // 3) Auth 계정 삭제
+      await deleteUser(auth.currentUser);
+      return true;
+    } catch (err) {
+      console.log("회원탈퇴 에러: ", err.code, err.message);
+      throw new Error(getKoreanErrorMessage(err.code));
+    }
+  };
+
+  return { user, loading, login, signup, logout, withDraw };
 };

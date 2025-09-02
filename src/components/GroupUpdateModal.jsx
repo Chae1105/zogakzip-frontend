@@ -86,7 +86,7 @@ function GroupUpdateModal({ group, groupId, isOpen, onClose }) {
       console.log("새 이미지 URL: ", newImageUrl);
 
       // 2) 업로드 성공 시 기존 이미지 삭제 (기존 이미지가 존재할 경우에만)
-      if (imageUrl && imageUrl != group.imageUrl) {
+      if (imageUrl && imageUrl !== group.imageUrl) {
         try {
           await deleteImage(imageUrl); // 기존 이미지 삭제하기
           console.log("기존 이미지 삭제 완료");
