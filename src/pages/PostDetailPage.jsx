@@ -1,10 +1,11 @@
 // GroupDetailPage에서 groupId 받아오기
 
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { fetchPostDetail } from "../services/postService";
+import { useNavigate, useParams } from "react-router-dom";
+import { deletePost, fetchPostDetail } from "../services/postService";
 import dayjs from "dayjs";
 import PostUpdateModal from "../components/PostUpdateModal";
+import { auth } from "../firebase";
 
 // 경로 = /groups/:groupId/:postId
 // 여기서 게시글 정보 불러오기 및 게시글 수정 모달 open
@@ -17,6 +18,10 @@ function PostDetailPage() {
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // 게시글 및 댓글 삭제 모달 공통 컴포넌트 만들면 거기로 옮기기
+  const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
 
   // 날짜 포맷용 함수
   const formatCreatedAt = (createdAt) => {
@@ -44,6 +49,24 @@ function PostDetailPage() {
       fetchPostData();
     }
   }, [postId]);
+
+  const handleDeletePost = async (e) => {
+    e.preventDefault();
+    setIsDeleting(true);
+
+    try {
+      console.log("현재 사용자: ", auth.currentUser.uid);
+      console.log("게시글 작성자: ", post.userId);
+      await deletePost(auth.currentUser.uid, groupId, postId, post);
+      alert("게시글이 삭제되었습니다.");
+      navigate(`/groups/${groupId}`);
+    } catch (err) {
+      console.error("게시글 삭제 실패: ", err);
+      alert("게시글 삭제에 실패했습니다. 다시 시도해주세요");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   if (isLoading) return <div>게시글 로딩 중...</div>;
 
@@ -82,7 +105,23 @@ function PostDetailPage() {
         />
       )}
 
-      
+      {isDeleteModalOpen && (
+        <div>
+          <div>
+            <p>게시글 삭제하기</p>
+            <button onClick={() => setIsDeleteModalOpen(false)}>X</button>
+          </div>
+
+          <p>정말 삭제하시겠습니까?</p>
+
+          <div>
+            <button onClick={() => setIsDeleteModalOpen(false)}>취소</button>
+            <button onClick={handleDeletePost}>
+              {isDeleting ? "삭제 중..." : "삭제하기"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

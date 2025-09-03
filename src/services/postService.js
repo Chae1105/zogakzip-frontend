@@ -70,7 +70,7 @@ export const updatePost = async (groupId, postId, postData) => {
 // 게시글 삭제
 export const deletePost = async (userId, groupId, postId, postData) => {
   try {
-    if (userId !== postId.userId) {
+    if (userId !== postData.userId) {
       throw new Error("게시글을 삭제할 권한이 없습니다.");
     }
 
