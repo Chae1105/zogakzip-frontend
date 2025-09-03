@@ -2,7 +2,7 @@ import GroupUpdateModal from "../components/GroupUpdateModal";
 import { useState, useEffect } from "react";
 import { db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import DeleteModal from "../components/DeleteModal";
 import { fetchGroupDetail } from "../services/groupService";
@@ -10,6 +10,7 @@ import { fetchGroupDetail } from "../services/groupService";
 function GroupDetailPage() {
   //const groupId = useParams().groupId;
   const { groupId } = useParams(); // 구조 분해 할당으로 변경
+  const navigate = useNavigate();
 
   const [group, setGroup] = useState({});
   const [loading, setLoading] = useState(true);
@@ -125,6 +126,8 @@ function GroupDetailPage() {
       >
         그룹 삭제
       </button>
+
+      <button onClick={() => navigate(`/groups/${groupId}/createPost`)}>게시글 작성하기</button>
 
       {isUpdateModalOpen && (
         <GroupUpdateModal

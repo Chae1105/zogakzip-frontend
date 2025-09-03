@@ -10,6 +10,7 @@ import MyPage from "./pages/MyPage";
 import GroupDetailPage from "./pages/GroupDetailPage";
 import GroupListPage from "./pages/GroupListPage";
 import CreateGroupPage from "./pages/CreateGroupPage";
+import CreatePostPage from "./pages/CreatePostPage";
 
 function App() {
   return (
@@ -26,7 +27,12 @@ function App() {
             <Route path="/groups" element={<GroupListPage />} />
             <Route path="/groups/:groupId" element={<GroupDetailPage />} />
 
-            <Route path="/createGroup" element={<CreateGroupPage/>}/>
+            <Route path="/createGroup" element={<CreateGroupPage />} />
+
+            <Route
+              path="/groups/:groupId/createPost"
+              element={<CreatePostPage />}
+            />
           </Routes>
         </div>
       </Router>

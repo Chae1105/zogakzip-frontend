@@ -1,0 +1,1 @@
+// GroupDetailPage에서 groupId 받아오기
