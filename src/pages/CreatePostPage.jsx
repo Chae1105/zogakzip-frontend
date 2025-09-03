@@ -32,7 +32,6 @@ function CreatePostPage() {
 
     try {
       const postData = {
-        groupId: groupId,
         userId: auth.currentUser.uid,
         title,
         content,
@@ -40,7 +39,7 @@ function CreatePostPage() {
         memoryPlace,
       };
 
-      const response = await createPost(postData);
+      const response = await createPost(groupId, postData);
       if (response) {
         alert("게시글 생성 완료!");
         navigate(`/groups/${groupId}`);

@@ -6,6 +6,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import DeleteModal from "../components/DeleteModal";
 import { fetchGroupDetail } from "../services/groupService";
+import PostList from "../components/PostList";
 
 function GroupDetailPage() {
   //const groupId = useParams().groupId;
@@ -127,7 +128,11 @@ function GroupDetailPage() {
         그룹 삭제
       </button>
 
-      <button onClick={() => navigate(`/groups/${groupId}/createPost`)}>게시글 작성하기</button>
+      <button onClick={() => navigate(`/groups/${groupId}/createPost`)}>
+        게시글 작성하기
+      </button>
+
+      <PostList groupId={groupId} />
 
       {isUpdateModalOpen && (
         <GroupUpdateModal

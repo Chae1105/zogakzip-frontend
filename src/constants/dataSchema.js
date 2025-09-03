@@ -9,8 +9,11 @@ const groupData = {
   introduction: "소개",
   isPublic: true,
   likeCount: 0,
-  members: [""],
+  members: [""], // 필수 (마이페이지 기능 위해)
   postCount: 0,
+  createdAd: ""
+
+  createdBy : "userId" // 추가
 };
  */
 
@@ -20,9 +23,9 @@ const userData = {
   password: ""
   imageUrl: ""
   userName: ""
-  posts: ["addDoc으로 자동 생성된 ID"]
-  comments: ["addDoc으로 자동 생성, 해당 post 내 서브 컬렉션"]
-  joinedGroup: ["그룹 상세 페이지 url에서 useParams()으로 받아온 그룹ID"]
+  posts: ["addDoc으로 자동 생성된 ID"] // 삭제
+  comments: ["addDoc으로 자동 생성, 해당 post 내 서브 컬렉션"] // 삭제
+  joinedGroup: ["그룹 상세 페이지 url에서 useParams()으로 받아온 그룹ID"] // 삭제
 }
 */
 
