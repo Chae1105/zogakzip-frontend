@@ -69,10 +69,20 @@ function Comment({ groupId, postId, commentData }) {
     }
   };
 
+  // 날짜 포맷용 함수
+  const formatCreatedAt = (createdAt) => {
+    if (!createdAt) return "정보 없음";
+    if (typeof createdAt.toDate === "function") {
+      return dayjs(createdAt.toDate()).format("YYYY-MM-DD");
+    }
+    return createdAt; // 이미 포맷이 된 형태라면 그냥 리턴
+  };
+
   return (
     <div>
       <div>
-        <p>이름: {commentData.userId}</p>
+        <p>이름: {commentData.userName}</p>
+        <p>날짜: {formatCreatedAt(commentData.createdAt)}</p>
         {isUpdating ? (
           <div>
             <input

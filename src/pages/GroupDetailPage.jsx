@@ -5,7 +5,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { useParams, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import DeleteModal from "../components/DeleteModal";
-import { fetchGroupDetail } from "../services/groupService";
+import { fetchGroupDetail, updateGroup } from "../services/groupService";
 import PostList from "../components/PostList";
 
 function GroupDetailPage() {
@@ -14,6 +14,8 @@ function GroupDetailPage() {
   const navigate = useNavigate();
 
   const [group, setGroup] = useState({});
+  const [likeCount, setLikeCount] = useState(group.likeCount || 0);
+
   const [loading, setLoading] = useState(true);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -33,6 +35,7 @@ function GroupDetailPage() {
       try {
         const groupData = await fetchGroupDetail(groupId);
         setGroup(groupData);
+        setLikeCount(groupData.likeCount);
         console.log("그룹 정보: ", groupData);
       } catch (err) {
         console.error("그룹 정보 불러오기 실패:  ", err);
@@ -45,7 +48,19 @@ function GroupDetailPage() {
     if (groupId) {
       fetchGroupData();
     }
-  }, [groupId]);
+  }, [likeCount, groupId]);
+
+  // 실시간 반영이 안됨. 뭐가 문제인지 확인하
+  const handleClickLike = async () => {
+    try {
+      const newCount = group.likeCount + 1;
+      await updateGroup({ ...group, likeCount: newCount }, groupId);
+      setLikeCount(newCount);
+      alert("좋아요 누르기 성공!");
+    } catch (err) {
+      console.error("좋아요 누르기 실패");
+    }
+  };
 
   /* 
   // 수정 모달창 닫은 후 데이터 새로고침 하기 위해
@@ -98,6 +113,7 @@ function GroupDetailPage() {
   return (
     <div>
       <h2>그룹 상세 페이지</h2>
+      <button onClick={handleClickLike}>공감수 증가</button>
 
       <div>
         {group.imageUrl && (
@@ -111,7 +127,7 @@ function GroupDetailPage() {
         <p>그룹 소개: {group.introduction}</p>
         <p>그룹 생성일: {formatCreatedAt(group.createdAt)}</p>
         <p>공개 여부: {group.isPublic ? "공개" : "비공개"}</p>
-        <p>좋아요 수: {group.likeCount || 0}</p>
+        <p>좋아요 수: {likeCount || 0}</p>
         <p>게시글 수: {group.postCount || 0}</p>
       </div>
 

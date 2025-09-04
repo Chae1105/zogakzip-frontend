@@ -5,7 +5,7 @@ import { auth } from "../firebase";
 
 // 댓글 목록 겸 댓글 생성 기능 (댓글 생성은 모달창에 X)
 
-function CommentList({ groupId, postId }) {
+function CommentList({ groupId, postId, userName }) {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,6 +18,7 @@ function CommentList({ groupId, postId }) {
         const allComments = await fetchCommentDocs(groupId, postId);
         const commentsData = allComments.docs.map((doc) => ({
           commentId: doc.id,
+          userName: userName,
           ...doc.data(),
         }));
         setComments(commentsData);

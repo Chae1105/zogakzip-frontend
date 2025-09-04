@@ -4,6 +4,7 @@ import { createPost } from "../services/postService";
 import { auth } from "../firebase";
 import { uploadImage } from "../services/fileService";
 import { useState } from "react";
+import { fetchGroupDetail, updateGroup } from "../services/groupService";
 
 function CreatePostPage() {
   const { groupId } = useParams();
@@ -41,6 +42,12 @@ function CreatePostPage() {
 
       const response = await createPost(groupId, postData);
       if (response) {
+        // 게시글 생성 완료 시 group의 postCount 증
+        const groupData = await fetchGroupDetail(groupId);
+        await updateGroup(
+          { ...groupData, postCount: groupData.postCount + 1 },
+          groupId
+        );
         alert("게시글 생성 완료!");
         navigate(`/groups/${groupId}`);
       } else {
