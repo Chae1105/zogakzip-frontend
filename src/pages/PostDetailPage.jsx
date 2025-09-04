@@ -6,6 +6,7 @@ import { deletePost, fetchPostDetail } from "../services/postService";
 import dayjs from "dayjs";
 import PostUpdateModal from "../components/PostUpdateModal";
 import { auth } from "../firebase";
+import CommentList from "../components/CommentList";
 
 // 경로 = /groups/:groupId/:postId
 // 여기서 게시글 정보 불러오기 및 게시글 수정 모달 open
@@ -122,6 +123,10 @@ function PostDetailPage() {
           </div>
         </div>
       )}
+
+      <div>
+        <CommentList groupId={groupId} postId={postId} />
+      </div>
     </div>
   );
 }

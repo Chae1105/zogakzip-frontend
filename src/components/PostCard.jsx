@@ -11,7 +11,7 @@ function PostCard({ groupId, postInfo }) {
   return (
     <div onClick={navigateToDetail}>
       <img
-        src={postInfo.imageURl || defaultImg}
+        src={postInfo.imageUrl || defaultImg}
         alt="게시글 이미지"
         className="w-50 h-50 object-contain"
       />

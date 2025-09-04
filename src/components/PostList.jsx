@@ -38,7 +38,7 @@ function PostList({ groupId }) {
   return (
     <div>
       <h1>게시글 목록</h1>
-      <div>
+      <div className="flex">
         {posts.map((post) => (
           <PostCard key={post.postId} groupId={groupId} postInfo={post} />
         ))}

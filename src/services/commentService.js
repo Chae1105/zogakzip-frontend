@@ -22,7 +22,7 @@ export const createComment = async (userId, groupId, postId, commentData) => {
     const result = await addDoc(
       collection(db, "groups", groupId, "posts", postId, "comments"),
       {
-        ...commentData,
+        content: commentData,
         userId: userId,
         createdAt: serverTimestamp(),
       }
@@ -38,9 +38,9 @@ export const createComment = async (userId, groupId, postId, commentData) => {
 export const fetchCommentDocs = async (groupId, postId) => {
   try {
     const commentDocs = await getDocs(
-      doc(db, "groups", groupId, "posts", postId, "comments")
+      collection(db, "groups", groupId, "posts", postId, "comments")
     );
-    if (!commentDocs.exists()) {
+    if (commentDocs.empty) {
       throw new Error("작성된 댓글이 없습니다");
     }
     return commentDocs;
