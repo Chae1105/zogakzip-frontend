@@ -21,7 +21,7 @@ function GroupListPage() {
         }));
         setGroups(groupsData);
       } catch (err) {
-        console.error("Error fetching groups: ", err);
+        console.error("그룹 불러오기 실패: ", err);
       } finally {
         setLoading(false);
       }

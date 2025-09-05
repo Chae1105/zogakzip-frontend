@@ -62,6 +62,7 @@ function GroupUpdateModal({ group, groupId, isOpen, onClose }) {
     }
   };
 
+
   const handleImageUpdate = async (e) => {
     const newImage = e.target.files[0];
     if (!newImage) return;

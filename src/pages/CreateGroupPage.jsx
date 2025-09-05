@@ -2,6 +2,7 @@ import { createGroup } from "../services/groupService";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { uploadImage } from "../services/fileService";
+import { auth } from "../firebase";
 
 function CreateGroupPage() {
   const [groupName, setGroupName] = useState("");
@@ -9,9 +10,13 @@ function CreateGroupPage() {
   const [introduction, setIntroduction] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [isPublic, setIsPublic] = useState(true);
+  const [members, setMembers] = useState([]);
 
   const [isUploading, setIsUploading] = useState(false); // 이미지 파일 업로드 상태 관리
   const [isCreating, setIsCreating] = useState(false); // 그룹 생성 상태 관리
+
+  const userId = auth.currentUser.uid;
+  console.log("유저 ID: ", userId);
 
   const navigate = useNavigate(); // 그룹 생성 후 메인페이지 이동 (일단은)
 
@@ -30,6 +35,8 @@ function CreateGroupPage() {
         introduction,
         imageUrl,
         isPublic,
+        members: [userId],
+        createdBy: userId,
       };
 
       const response = await createGroup(groupData);

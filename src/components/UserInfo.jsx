@@ -206,7 +206,7 @@ function UserInfo({ userId, userInfo }) {
                   <img
                     src={previewUrl || user.imageUrl || null}
                     alt="프로필 이미지"
-                    className="w-50 h-50"
+                    className="w-50 h-50 object-contain"
                   />
                   <input
                     type="file"
@@ -252,7 +252,7 @@ function UserInfo({ userId, userInfo }) {
               <img
                 src={user.imageUrl || null}
                 alt="유저 프로필 사진"
-                className="w-50 h-50"
+                className="w-50 h-50 object-contain"
               />
               <button onClick={() => setIsUpdating(true)}>정보 수정하기</button>
             </div>
