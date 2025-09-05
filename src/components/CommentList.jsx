@@ -12,36 +12,62 @@ function CommentList({ groupId, postId, userName }) {
   // 댓글 생성을 위한 본문 상태
   const [content, setContent] = useState("");
 
-  useEffect(() => {
-    async function fetchComments() {
-      try {
-        const allComments = await fetchCommentDocs(groupId, postId);
-        const commentsData = allComments.docs.map((doc) => ({
-          commentId: doc.id,
-          userName: userName,
-          ...doc.data(),
-        }));
-        setComments(commentsData);
-      } catch (err) {
-        console.error("댓글 불러오기 실패: ", err);
-      } finally {
-        setLoading(false);
-      }
+  // 댓글 불러오기 함수를 별도로 정의하기
+  const fetchComments = async () => {
+    try {
+      setLoading(true);
+      const allComments = await fetchCommentDocs(groupId, postId);
+      const commentsData = allComments.docs.map((doc) => ({
+        commentId: doc.id,
+        userName: userName,
+        ...doc.data(),
+      }));
+      setComments(commentsData);
+    } catch (err) {
+      console.error("댓글 불러오기 실패: ", err);
+      // 댓글이 없는 경우도 정상적으로 처리하기 위해
+      setComments([]);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    fetchComments();
-  }, [comments]);
+  // 초기 댓글 데이터 로드하기 -> 의존성 배열에서 comments 없앴음
+  useEffect(() => {
+    console.log("CommentList useEffect");
+
+    if (groupId && postId) {
+      fetchComments();
+    }
+  }, [groupId, postId, userName]);
 
   // 댓글 생성하기, userId, groupId, postId, commentData
   const handleCreateComment = async () => {
+    // 댓글 내용 무조건 작성하도록
+    if (!content.trim()) {
+      alert("댓글 내용을 입력해주세요!");
+      return;
+    }
     try {
       await createComment(auth.currentUser.uid, groupId, postId, content);
       console.log("댓글 생성 완료");
+
+      // 댓글 생성 후 상태 즉시 업데이트 (낙관적)
+      setContent(""); // 댓글 입력창 초기화
+      await fetchComments(); // 댓글 목록 새로고침하기
+
       alert("댓글 생성 완료!");
     } catch (err) {
       console.error("댓글 생성 실패: ", err);
       alert("댓글 생성 실패!");
     }
+  };
+
+  // 댓글 삭제 후 호출될 함수
+  const handleCommentDeleted = (deletedCommentId) => {
+    setComments((prevComments) =>
+      prevComments.filter((comment) => comment.commentId !== deletedCommentId)
+    );
   };
 
   if (loading) return <div>댓글 로딩 중..</div>;
@@ -55,14 +81,19 @@ function CommentList({ groupId, postId, userName }) {
         <button onClick={handleCreateComment}>댓글 등록</button>
       </div>
       <div>
-        {comments.map((comment) => (
-          <Comment
-            key={comment.commentId}
-            groupId={groupId}
-            postId={postId}
-            commentData={comment}
-          />
-        ))}
+        {comments.length === 0 ? (
+          <p>댓글이 없습니다.</p>
+        ) : (
+          comments.map((comment) => (
+            <Comment
+              key={comment.commentId}
+              groupId={groupId}
+              postId={postId}
+              commentData={comment}
+              onCommentDeleted={handleCommentDeleted}
+            />
+          ))
+        )}
       </div>
     </div>
   );
