@@ -88,6 +88,7 @@ function Comment({ groupId, postId, commentData }) {
             <input
               value={content}
               onChange={(e) => setContent(e.target.value)}
+              required
             />
             <button
               onClick={() => {
