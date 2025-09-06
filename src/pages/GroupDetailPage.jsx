@@ -49,7 +49,7 @@ function GroupDetailPage() {
           setIsGroupMember(true);
         }
 
-        if (groupData.createdBu === auth.currentUser?.uid) {
+        if (groupData.createdBy === auth.currentUser?.uid) {
           setIsGroupCreator(true);
         }
       } catch (err) {
@@ -179,6 +179,15 @@ function GroupDetailPage() {
         <p>공개 여부: {group.isPublic ? "공개" : "비공개"}</p>
         <p>좋아요 수: {likeCount || 0}</p>
         <p>게시글 수: {group.postCount || 0}</p>
+        <div className="flex">
+          <p>태그: </p>
+          {group.tags &&
+            group.tags.map((tag) => (
+              <div key={tag} className="flex">
+                <p># {tag} </p>
+              </div>
+            ))}
+        </div>
       </div>
       {!isGroupMember ? (
         <button onClick={handleJoinGroup}>그룹 가입하기</button>

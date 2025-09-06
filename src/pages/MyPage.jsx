@@ -68,9 +68,9 @@ function MyPage() {
             groupId: group.groupId,
             ...doc.data(),
           }));
-          console.log("현재 postsData: ", postsData);
           myPosts.push(...postsData);
         }
+        console.log("게시글들: ", myPosts);
         setUserPost([...myPosts]);
       } catch (err) {
         console.error("내 그룹 및 게시글 정보 불러오기 실패: ", err);

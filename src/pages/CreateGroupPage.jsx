@@ -1,24 +1,42 @@
 import { createGroup } from "../services/groupService";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { uploadImage } from "../services/fileService";
 import { auth } from "../firebase";
 
 function CreateGroupPage() {
+  // 이 페이지 들어오고 나서 새로고침을 하면 auth.currentUser.uid가 null이 됨
+  // 이 문제를 해결하기 위한 상태 설정
+  const [userId, setUserId] = useState();
+  const [authLoading, setAuthLoading] = useState(true);
+
   const [groupName, setGroupName] = useState("");
   const [groupPassword, setGroupPassword] = useState("");
   const [introduction, setIntroduction] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [isPublic, setIsPublic] = useState(true);
-  const [members, setMembers] = useState([]);
+
+  // 태그 기능 도전
+  const [inputTag, setInputTag] = useState("");
+  const [tagList, setTagList] = useState([]);
+  const [tagData, setTagData] = useState([]);
+  // 태그 인풋창 데이터 = inputTag
+  // form 안에 태그 리스트 미리보기 = tagList
+  // firestore에 저장할 태그 데이터 = tagData
 
   const [isUploading, setIsUploading] = useState(false); // 이미지 파일 업로드 상태 관리
   const [isCreating, setIsCreating] = useState(false); // 그룹 생성 상태 관리
 
-  const userId = auth.currentUser.uid;
-  console.log("유저 ID: ", userId);
-
   const navigate = useNavigate(); // 그룹 생성 후 메인페이지 이동 (일단은)
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUserId(user?.uid || null);
+      setAuthLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
 
   // 그룹 생성 함수 - 이미지 업로드 완료 후에 실행하도록
   const handleCreateGroup = async () => {
@@ -37,6 +55,7 @@ function CreateGroupPage() {
         isPublic,
         members: [userId],
         createdBy: userId,
+        tags: tagList,
       };
 
       const response = await createGroup(groupData);
@@ -87,6 +106,9 @@ function CreateGroupPage() {
     }
   };
 
+  if (authLoading) return <div>로딩 중...</div>;
+  if (!userId) return alert("로그인이 필요합니다!");
+
   return (
     <div>
       <h1>그룹 생성</h1>
@@ -118,6 +140,42 @@ function CreateGroupPage() {
         />
         {isUploading && <p>이미지 업로드 중... </p>}
         {imageUrl && <p>이미지 업로드 완료!</p>}
+
+        <div>
+          <label>태그</label>
+
+          <input
+            value={inputTag}
+            onChange={(e) => setInputTag(e.target.value)}
+          />
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              setTagList([...tagList, inputTag]);
+              setInputTag("");
+            }}
+          >
+            태그추가
+          </button>
+          <div className="flex">
+            {tagList &&
+              tagList.map((tag) => (
+                <div key={tag} className="flex">
+                  <p># {tag} </p>
+                  <button
+                    onClick={() => {
+                      const newTags = tagList.filter(
+                        (saveTag) => saveTag !== tag
+                      );
+                      setTagList([...newTags]);
+                    }}
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+          </div>
+        </div>
 
         <button type="button" onClick={() => setIsPublic(!isPublic)}>
           {isPublic ? "공개" : "비공개"}
