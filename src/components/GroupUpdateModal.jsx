@@ -13,6 +13,10 @@ function GroupUpdateModal({ group, groupId, isOpen, onClose }) {
   const [imageUrl, setImageUrl] = useState(group.imageUrl || "");
   const [isPublic, setIsPublic] = useState(group.isPublic ?? true);
 
+  // 태그 관련
+  const [inputTag, setInputTag] = useState("");
+  const [tagList, setTagList] = useState(group.tags || []);
+
   const [isUpdating, setIsUpdating] = useState(false); // 수정 상태 관리
   const [isImageUploading, setIsImageUploading] = useState(false); // 이미지 파일 업데이트 상태 관리
 
@@ -37,6 +41,7 @@ function GroupUpdateModal({ group, groupId, isOpen, onClose }) {
         introduction,
         imageUrl,
         isPublic,
+        tags: tagList,
 
         likeCount: group.likeCount || 0,
         postCount: group.postCount || 0,
@@ -61,7 +66,6 @@ function GroupUpdateModal({ group, groupId, isOpen, onClose }) {
       setIsUpdating(false);
     }
   };
-
 
   const handleImageUpdate = async (e) => {
     const newImage = e.target.files[0];
@@ -162,6 +166,42 @@ function GroupUpdateModal({ group, groupId, isOpen, onClose }) {
             {/* 사용자에게 진행상황 보여주기 */}
             {isImageUploading && <p>이미지 업로드 중...</p>}{" "}
             {imageUrl && !isImageUploading && <p>이미지 업로드 완료!</p>}
+          </div>
+
+          <div>
+            <label>태그</label>
+
+            <input
+              value={inputTag}
+              onChange={(e) => setInputTag(e.target.value)}
+            />
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                setTagList([...tagList, inputTag]);
+                setInputTag("");
+              }}
+            >
+              태그추가
+            </button>
+            <div className="flex">
+              {tagList &&
+                tagList.map((tag) => (
+                  <div key={tag} className="flex">
+                    <p># {tag} </p>
+                    <button
+                      onClick={() => {
+                        const newTags = tagList.filter(
+                          (saveTag) => saveTag !== tag
+                        );
+                        setTagList([...newTags]);
+                      }}
+                    >
+                      X
+                    </button>
+                  </div>
+                ))}
+            </div>
           </div>
 
           <div>

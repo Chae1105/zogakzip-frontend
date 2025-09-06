@@ -19,10 +19,8 @@ function CreateGroupPage() {
   // 태그 기능 도전
   const [inputTag, setInputTag] = useState("");
   const [tagList, setTagList] = useState([]);
-  const [tagData, setTagData] = useState([]);
   // 태그 인풋창 데이터 = inputTag
   // form 안에 태그 리스트 미리보기 = tagList
-  // firestore에 저장할 태그 데이터 = tagData
 
   const [isUploading, setIsUploading] = useState(false); // 이미지 파일 업로드 상태 관리
   const [isCreating, setIsCreating] = useState(false); // 그룹 생성 상태 관리
