@@ -24,9 +24,6 @@ export const createUser = async (userId, userData) => {
       ...userData,
       userName: userData.email.split("@")[0],
       imageUrl: "",
-      posts: [""],
-      comments: [""],
-      joinedGroup: [""],
     });
     return result;
   } catch (err) {

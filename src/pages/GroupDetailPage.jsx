@@ -1,6 +1,6 @@
 import GroupUpdateModal from "../components/GroupUpdateModal";
 import { useState, useEffect } from "react";
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useParams, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
@@ -20,6 +20,12 @@ function GroupDetailPage() {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+  // 그룹에 가입한 멤버인지 확인
+  const [isGroupMember, setIsGroupMember] = useState(false);
+
+  // 그룹을 만든 사람인지 확인
+  const [isGroupCreator, setIsGroupCreator] = useState(false);
+
   // 날짜 포맷용 함수
   const formatCreatedAt = (createdAt) => {
     if (!createdAt) return "정보 없음";
@@ -31,12 +37,21 @@ function GroupDetailPage() {
 
   // 상세 페이지 렌더링 - 여기 fetch 함수 모듈화/공통 함수 유틸화
   useEffect(() => {
+    console.log("GroupDetailPage useEffect");
     async function fetchGroupData() {
       try {
         const groupData = await fetchGroupDetail(groupId);
         setGroup(groupData);
         setLikeCount(groupData.likeCount);
         console.log("그룹 정보: ", groupData);
+
+        if (groupData.members.includes(auth.currentUser?.uid)) {
+          setIsGroupMember(true);
+        }
+
+        if (groupData.createdBu === auth.currentUser?.uid) {
+          setIsGroupCreator(true);
+        }
       } catch (err) {
         console.error("그룹 정보 불러오기 실패:  ", err);
       } finally {
@@ -50,7 +65,6 @@ function GroupDetailPage() {
     }
   }, [likeCount, groupId]);
 
-  // 실시간 반영이 안됨. 뭐가 문제인지 확인하
   const handleClickLike = async () => {
     try {
       const newCount = group.likeCount + 1;
@@ -59,6 +73,43 @@ function GroupDetailPage() {
       alert("좋아요 누르기 성공!");
     } catch (err) {
       console.error("좋아요 누르기 실패");
+    }
+  };
+
+  // 그룹 가입하기
+  const handleJoinGroup = async () => {
+    if (!auth.currentUser) {
+      alert("회원만 가능한 기능입니다!");
+      return;
+    }
+
+    try {
+      await updateGroup(
+        { ...group, members: [...group.members, auth.currentUser.uid] },
+        groupId
+      );
+      setIsGroupMember(true);
+      console.log("그룹 가입 성공");
+      alert("그룹 가입에 성공했습니다!");
+    } catch (err) {
+      console.error("그룹 가입 실패: ", err);
+      alert("그룹 가입에 실패했습니다. 다시 시도해주세요");
+    }
+  };
+
+  // 그룹 탈퇴하기
+  const handleWithdrawGroup = async () => {
+    try {
+      const newMembers = group.members.filter(
+        (userId) => userId !== auth.currentUser.uid
+      );
+      await updateGroup({ ...group, members: newMembers }, groupId);
+      setIsGroupMember(false);
+      console.log("그룹 탈퇴 성공");
+      alert("그룹 탈퇴에 성공했습니다!");
+    } catch (err) {
+      console.error("그룹 탈퇴 실패: ", err);
+      alert("그룹 탈퇴에 실패했습니다. 다시 시도해주세요");
     }
   };
 
@@ -114,7 +165,6 @@ function GroupDetailPage() {
     <div>
       <h2>그룹 상세 페이지</h2>
       <button onClick={handleClickLike}>공감수 증가</button>
-
       <div>
         {group.imageUrl && (
           <img
@@ -130,26 +180,35 @@ function GroupDetailPage() {
         <p>좋아요 수: {likeCount || 0}</p>
         <p>게시글 수: {group.postCount || 0}</p>
       </div>
-
-      <button
-        className="bg-pink-500"
-        onClick={() => setIsUpdateModalOpen(true)}
-      >
-        그룹 수정
-      </button>
-      <button
-        className="bg-yellow-500"
-        onClick={() => setIsDeleteModalOpen(true)}
-      >
-        그룹 삭제
-      </button>
-
-      <button onClick={() => navigate(`/groups/${groupId}/createPost`)}>
-        게시글 작성하기
-      </button>
-
+      {!isGroupMember ? (
+        <button onClick={handleJoinGroup}>그룹 가입하기</button>
+      ) : (
+        <button onClick={handleWithdrawGroup}>그룹 탈퇴하기</button>
+      )}
+      {isGroupMember && isGroupCreator && (
+        <div>
+          <button
+            className="bg-pink-500"
+            onClick={() => setIsUpdateModalOpen(true)}
+          >
+            그룹 수정
+          </button>
+          <button
+            className="bg-yellow-500"
+            onClick={() => setIsDeleteModalOpen(true)}
+          >
+            그룹 삭제
+          </button>
+        </div>
+      )}
+      {isGroupMember && (
+        <div>
+          <button onClick={() => navigate(`/groups/${groupId}/createPost`)}>
+            게시글 작성하기
+          </button>
+        </div>
+      )}
       <PostList groupId={groupId} />
-
       {isUpdateModalOpen && (
         <GroupUpdateModal
           group={group}
