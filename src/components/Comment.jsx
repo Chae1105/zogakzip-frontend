@@ -14,7 +14,7 @@ import dayjs from "dayjs";
 import { deleteComment, updateComment } from "../services/commentService";
 import { auth } from "../firebase";
 
-function Comment({ groupId, postId, commentData }) {
+function Comment({ groupId, postId, commentData, onCommentDeleted }) {
   const [comment, setComment] = useState(commentData);
   const [content, setContent] = useState(commentData.content);
 
@@ -28,6 +28,11 @@ function Comment({ groupId, postId, commentData }) {
       return;
     }
 
+    if (!content.trim()) {
+      alert("댓글 내용을 입력해주세요!");
+      return;
+    }
+
     setIsUpdating(true);
 
     try {
@@ -37,6 +42,7 @@ function Comment({ groupId, postId, commentData }) {
       });
       console.log("댓글 수정 성공");
       alert("댓글 수정에 성공했습니다");
+      setIsUpdating(false);
     } catch (err) {
       console.error("댓글 수정 실패: ", err);
       alert("댓글 수정에 실패했습니다. 다시 시도해주세요");
@@ -57,6 +63,13 @@ function Comment({ groupId, postId, commentData }) {
       );
       if (result) {
         console.log("댓글 삭제 성공");
+
+        // 부모 컴포넌트에 삭제된 댓글 ID 전달
+        if (onCommentDeleted) {
+          onCommentDeleted(commentData.commentId);
+        }
+
+        setIsDeleteModalOpen(false);
         alert("댓글 삭제 성공!");
       } else {
         alert("댓글 삭제 실패!");
@@ -68,6 +81,12 @@ function Comment({ groupId, postId, commentData }) {
       setIsDeleting(false);
     }
   };
+
+  // 수정 취소 시 원래 내용으로 되돌리기
+  const handleCancelUpdate =() => {
+    setContent(commentData.content); 
+    setIsUpdating(false);
+  }
 
   // 날짜 포맷용 함수
   const formatCreatedAt = (createdAt) => {
@@ -88,12 +107,10 @@ function Comment({ groupId, postId, commentData }) {
             <input
               value={content}
               onChange={(e) => setContent(e.target.value)}
+              required
             />
             <button
-              onClick={() => {
-                setContent(commentData.content);
-                setIsUpdating(false);
-              }}
+              onClick={handleCancelUpdate}
             >
               취소
             </button>
