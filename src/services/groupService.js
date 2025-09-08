@@ -53,10 +53,10 @@ export const fetchGroupDetail = async (groupId) => {
 };
 
 // 그룹 수정
-export const updateGroup = async (groupData, groupId) => {
+export const updateGroup = async (updateData, groupId) => {
   try {
     console.log("수정시작: ", groupId);
-    const result = await setDoc(doc(db, "groups", groupId), groupData, {
+    const result = await setDoc(doc(db, "groups", groupId), updateData, {
       merge: true,
     });
     return result;

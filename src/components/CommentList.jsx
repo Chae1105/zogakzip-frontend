@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { createComment, fetchCommentDocs } from "../services/commentService";
 import Comment from "./Comment";
 import { auth } from "../firebase";
+import { fetchUserDetail } from "../services/userService";
 
 // 댓글 목록 겸 댓글 생성 기능 (댓글 생성은 모달창에 X)
 
-function CommentList({ groupId, postId, userName }) {
+function CommentList({ groupId, postId, currentUserId }) {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -16,10 +17,10 @@ function CommentList({ groupId, postId, userName }) {
   const fetchComments = async () => {
     try {
       setLoading(true);
+
       const allComments = await fetchCommentDocs(groupId, postId);
       const commentsData = allComments.docs.map((doc) => ({
         commentId: doc.id,
-        userName: userName,
         ...doc.data(),
       }));
       setComments(commentsData);
@@ -35,11 +36,12 @@ function CommentList({ groupId, postId, userName }) {
   // 초기 댓글 데이터 로드하기 -> 의존성 배열에서 comments 없앴음
   useEffect(() => {
     console.log("CommentList useEffect");
+    console.log("현재 유저 ID: ", currentUserId);
 
     if (groupId && postId) {
       fetchComments();
     }
-  }, [groupId, postId, userName]);
+  }, [groupId, postId]);
 
   // 댓글 생성하기, userId, groupId, postId, commentData
   const handleCreateComment = async () => {
@@ -48,8 +50,21 @@ function CommentList({ groupId, postId, userName }) {
       alert("댓글 내용을 입력해주세요!");
       return;
     }
+
+    if (!currentUserId) {
+      alert("회원만 가능한 기능입니다!");
+      setContent("");
+      return;
+    }
+
+    const userData = await fetchUserDetail(currentUserId);
+    const commentData = {
+      userName: userData.userName,
+      content,
+    };
+
     try {
-      await createComment(auth.currentUser.uid, groupId, postId, content);
+      await createComment(currentUserId, groupId, postId, commentData);
       console.log("댓글 생성 완료");
 
       // 댓글 생성 후 상태 즉시 업데이트 (낙관적)
@@ -91,6 +106,7 @@ function CommentList({ groupId, postId, userName }) {
               postId={postId}
               commentData={comment}
               onCommentDeleted={handleCommentDeleted}
+              currentUserId={currentUserId}
             />
           ))
         )}

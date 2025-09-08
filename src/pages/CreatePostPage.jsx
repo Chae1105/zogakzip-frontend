@@ -5,9 +5,13 @@ import { auth } from "../firebase";
 import { deleteImage, uploadImage } from "../services/fileService";
 import { useState, useEffect } from "react";
 import { fetchGroupDetail, updateGroup } from "../services/groupService";
+import { fetchUserDetail } from "../services/userService";
 
 function CreatePostPage() {
   const { groupId } = useParams();
+
+  const [user, setUser] = useState();
+  const [authLoading, setAuthLoading] = useState(true);
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -26,6 +30,14 @@ function CreatePostPage() {
 
   // 게시글 생성 후 그룹 상세 페이지 이동
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -56,8 +68,11 @@ function CreatePostPage() {
         setImageUrl(newImageUrl);
       }
 
+      const userData = await fetchUserDetail(user.uid);
+
       const postData = {
-        userId: auth.currentUser.uid,
+        userId: user.uid,
+        userName: userData.userName,
         title,
         content,
         imageUrl: newImageUrl,
@@ -76,7 +91,7 @@ function CreatePostPage() {
         alert("게시글 생성 완료!");
         navigate(`/groups/${groupId}`);
       } else {
-        alert("그룹 생성에 실패했습니다. 다시 시도해주세요!");
+        alert("게시글 생성에 실패했습니다. 다시 시도해주세요!");
       }
     } catch (err) {
       console.error("게시글 생성 중 오류 발생: ", err);
