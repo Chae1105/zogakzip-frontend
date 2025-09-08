@@ -54,7 +54,7 @@ export const fetchPostDetail = async (groupId, postId) => {
 // 게시글 수정
 export const updatePost = async (groupId, postId, postData) => {
   try {
-    console.log("게시글 수정 시작");
+    console.log("게시글 수정 시작: ", postData);
     const result = setDoc(
       doc(db, "groups", groupId, "posts", postId),
       postData,

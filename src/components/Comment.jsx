@@ -9,18 +9,25 @@
 // '수정하기' 누르면 content 보여주는 부분이 input 창 + 버튼으로 바뀌도록?
 // CommentList에서 commentData 넘겨줄 때, commentId = doc.id 로 데이터 추가 후 넘기기
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { deleteComment, updateComment } from "../services/commentService";
 import { auth } from "../firebase";
 
-function Comment({ groupId, postId, commentData, onCommentDeleted }) {
-  const [comment, setComment] = useState(commentData);
+function Comment({
+  groupId,
+  postId,
+  commentData,
+  onCommentDeleted,
+  currentUserId,
+}) {
   const [content, setContent] = useState(commentData.content);
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const isWriter = commentData.userId === currentUserId;
 
   const handleUpdateComment = async () => {
     if (!groupId || !postId || !commentData) {
@@ -55,7 +62,6 @@ function Comment({ groupId, postId, commentData, onCommentDeleted }) {
     setIsDeleting(true);
     try {
       const result = await deleteComment(
-        auth.currentUser.uid,
         groupId,
         postId,
         commentData.commentId,
@@ -83,10 +89,10 @@ function Comment({ groupId, postId, commentData, onCommentDeleted }) {
   };
 
   // 수정 취소 시 원래 내용으로 되돌리기
-  const handleCancelUpdate =() => {
-    setContent(commentData.content); 
+  const handleCancelUpdate = () => {
+    setContent(commentData.content);
     setIsUpdating(false);
-  }
+  };
 
   // 날짜 포맷용 함수
   const formatCreatedAt = (createdAt) => {
@@ -109,18 +115,20 @@ function Comment({ groupId, postId, commentData, onCommentDeleted }) {
               onChange={(e) => setContent(e.target.value)}
               required
             />
-            <button
-              onClick={handleCancelUpdate}
-            >
-              취소
-            </button>
+            <button onClick={handleCancelUpdate}>취소</button>
             <button onClick={handleUpdateComment}>댓글 수정</button>
           </div>
         ) : (
           <div>
             <p>본문: {content}</p>
-            <button onClick={() => setIsUpdating(true)}>수정하기</button>
-            <button onClick={() => setIsDeleteModalOpen(true)}>삭제하기</button>
+            {isWriter && (
+              <>
+                <button onClick={() => setIsUpdating(true)}>수정하기</button>
+                <button onClick={() => setIsDeleteModalOpen(true)}>
+                  삭제하기
+                </button>
+              </>
+            )}
           </div>
         )}
         {isDeleteModalOpen && (

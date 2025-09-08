@@ -22,7 +22,7 @@ export const createComment = async (userId, groupId, postId, commentData) => {
     const result = await addDoc(
       collection(db, "groups", groupId, "posts", postId, "comments"),
       {
-        content: commentData,
+        ...commentData,
         userId: userId,
         createdAt: serverTimestamp(),
       }
@@ -73,17 +73,12 @@ export const updateComment = async (
 
 // 댓글 삭제
 export const deleteComment = async (
-  userId,
   groupId,
   postId,
   commentId,
   commentData
 ) => {
   try {
-    if (userId !== commentData.userId) {
-      throw new Error("댓글을 삭제할 권한이 없습니다.");
-    }
-
     await deleteDoc(
       doc(db, "groups", groupId, "posts", postId, "comments", commentId)
     );

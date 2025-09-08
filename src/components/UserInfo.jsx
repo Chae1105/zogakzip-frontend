@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react";
 import {
-  fetchUserDetail,
   updateUser,
-  deleteUserData,
 } from "../services/userService";
 import { auth } from "../firebase";
 import { deleteImage, uploadImage } from "../services/fileService";
-import React from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
@@ -178,7 +175,7 @@ function UserInfo({ userId, userInfo }) {
 
       await withDraw(inputPassword, user);
       alert("회원탈퇴가 완료되었습니다!");
-
+      
       navigate("/");
     } catch (err) {
       alert(err.message);
@@ -214,9 +211,7 @@ function UserInfo({ userId, userInfo }) {
                     onChange={handleFileChange} // 수정: handleUploadImage -> handleFileChange
                     disabled={isImageUploading}
                   />
-                  {/* 사용자에게 진행상황 보여주기 */}
-                  {isImageUploading && <p>이미지 업로드 중...</p>}{" "}
-                  {imageUrl && !isImageUploading && <p>이미지 업로드 완료!</p>}
+
                 </div>
                 <div>
                   <button type="button" onClick={() => setIsUpdating(false)}>
