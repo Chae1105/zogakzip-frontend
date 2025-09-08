@@ -1,7 +1,7 @@
 import { createGroup } from "../services/groupService";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { uploadImage } from "../services/fileService";
+import { deleteImage, uploadImage } from "../services/fileService";
 import { auth } from "../firebase";
 
 function CreateGroupPage() {
@@ -16,7 +16,11 @@ function CreateGroupPage() {
   const [imageUrl, setImageUrl] = useState("");
   const [isPublic, setIsPublic] = useState(true);
 
-  // 태그 기능 도전
+  // 이미지 미리보기
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+  // 태그 기능
   const [inputTag, setInputTag] = useState("");
   const [tagList, setTagList] = useState([]);
   // 태그 인풋창 데이터 = inputTag
@@ -27,6 +31,7 @@ function CreateGroupPage() {
 
   const navigate = useNavigate(); // 그룹 생성 후 메인페이지 이동 (일단은)
 
+  // 사용자 인증 확인 -> auth.currentUser가 존재하는지 확인하기 위해
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUserId(user?.uid || null);
@@ -36,20 +41,43 @@ function CreateGroupPage() {
     return unsubscribe;
   }, []);
 
+  // 이미지 미리보기 관련 useEffect
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   // 그룹 생성 함수 - 이미지 업로드 완료 후에 실행하도록
   const handleCreateGroup = async () => {
+    /*
     if (isUploading) {
       alert("이미지 업로드가 진행 중입니다. 잠시 후 다시 시도해주세요!");
       return;
     }
-
+      */
     setIsCreating(true); // 이미지 업로드 완료 시 그룹 생성 과정 진행하기
+
+    let newImageUrl = imageUrl;
+
     try {
+      if (selectedFile) {
+        if (imageUrl) {
+          await deleteImage(imageUrl);
+          console.log("그룹 기존 이미지 삭제 완료");
+        }
+
+        newImageUrl = await uploadImage(selectedFile, "groups");
+        setImageUrl(newImageUrl);
+        console.log("새 이미지 업로드 완료");
+      }
       const groupData = {
         groupName,
         groupPassword,
         introduction,
-        imageUrl,
+        imageUrl: newImageUrl,
         isPublic,
         members: [userId],
         createdBy: userId,
@@ -71,6 +99,23 @@ function CreateGroupPage() {
     }
   };
   // -> 좀 더 에러가 발생할 수 있는 상황을 고려해 try ..catch문과 조건문, 그리고 alert문도 추가
+
+  // 이미지 미리보기 함수
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("파일 크기는 5MB 이하여야 합니다. 다시 시도해주세요.");
+      return;
+    }
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
 
   // 이미지 파일 업로드
   const handleUploadImage = async (e) => {
@@ -130,15 +175,21 @@ function CreateGroupPage() {
           value={introduction}
           onChange={(e) => setIntroduction(e.target.value)}
         />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleUploadImage}
-          disabled={isUploading}
-        />
-        {isUploading && <p>이미지 업로드 중... </p>}
-        {imageUrl && <p>이미지 업로드 완료!</p>}
-
+        <div>
+          <img
+            src={previewUrl || null}
+            alt="그룹 이미지"
+            className="w-50 h-50 object-contain"
+          />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            disabled={isUploading}
+          />
+          {isUploading && <p>이미지 업로드 중... </p>}
+          {imageUrl && <p>이미지 업로드 완료!</p>}
+        </div>
         <div>
           <label>태그</label>
 

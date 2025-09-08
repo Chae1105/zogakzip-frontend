@@ -127,6 +127,15 @@ function PostDetailPage() {
         <p>작성자: {userName}</p>
         <p>작성 날짜: {formatCreatedAt(post.createdAt)}</p>
         <p>추억의 장소: {post.memoryPlace}</p>
+        <div className="flex">
+          <p>태그: </p>
+          {post.tags &&
+            post.tags.map((tag) => (
+              <div key={tag} className="flex">
+                <p># {tag} </p>
+              </div>
+            ))}
+        </div>
         <p>공감수: {likeCount}</p>
         {post.imageUrl && (
           <img

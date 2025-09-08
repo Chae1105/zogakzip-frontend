@@ -2,8 +2,8 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createPost } from "../services/postService";
 import { auth } from "../firebase";
-import { uploadImage } from "../services/fileService";
-import { useState } from "react";
+import { deleteImage, uploadImage } from "../services/fileService";
+import { useState, useEffect } from "react";
 import { fetchGroupDetail, updateGroup } from "../services/groupService";
 
 function CreatePostPage() {
@@ -17,8 +17,21 @@ function CreatePostPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+  // 태그 관련
+  const [inputTag, setInputTag] = useState("");
+  const [tagList, setTagList] = useState([]);
+
   // 게시글 생성 후 그룹 상세 페이지 이동
   const navigate = useNavigate();
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   const handleCreatePost = async (e) => {
     e.preventDefault();
@@ -31,13 +44,25 @@ function CreatePostPage() {
     // 이미지 업로드 완료 시 게시글 생성 진행
     setIsUploading(true);
 
+    let newImageUrl = imageUrl;
+
     try {
+      if (selectedFile) {
+        if (imageUrl) {
+          await deleteImage(imageUrl);
+        }
+
+        newImageUrl = await uploadImage(selectedFile, "posts");
+        setImageUrl(newImageUrl);
+      }
+
       const postData = {
         userId: auth.currentUser.uid,
         title,
         content,
-        imageUrl,
+        imageUrl: newImageUrl,
         memoryPlace,
+        tags: tagList,
       };
 
       const response = await createPost(groupId, postData);
@@ -59,6 +84,23 @@ function CreatePostPage() {
     } finally {
       setIsCreating(false);
     }
+  };
+
+  // 이미지 미리보기
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("파일 크기는 5MB 이하여야 합니다. 다시 시도해주세요.");
+      return;
+    }
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
   };
 
   // 이미지 파일 업로드
@@ -110,10 +152,15 @@ function CreatePostPage() {
 
         <div>
           <label>이미지</label>
+          <img
+            src={previewUrl || null}
+            alt="게시글 이미지"
+            className="w-50 h-50 object-contain"
+          />
           <input
             type="file"
             accept="image/*"
-            onChange={handleUploadImage}
+            onChange={handleFileChange}
             disabled={isUploading}
           />
           {isUploading && <p>이미지 업로드 중...</p>}{" "}
@@ -137,6 +184,42 @@ function CreatePostPage() {
             onChange={(e) => setMemoryPlage(e.target.value)}
             placeholder="추억의 장소를 입력해주세요"
           />
+        </div>
+
+        <div>
+          <label>태그</label>
+
+          <input
+            value={inputTag}
+            onChange={(e) => setInputTag(e.target.value)}
+          />
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              setTagList([...tagList, inputTag]);
+              setInputTag("");
+            }}
+          >
+            태그추가
+          </button>
+          <div className="flex">
+            {tagList &&
+              tagList.map((tag) => (
+                <div key={tag} className="flex">
+                  <p># {tag} </p>
+                  <button
+                    onClick={() => {
+                      const newTags = tagList.filter(
+                        (saveTag) => saveTag !== tag
+                      );
+                      setTagList([...newTags]);
+                    }}
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+          </div>
         </div>
 
         <div>

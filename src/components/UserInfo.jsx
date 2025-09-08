@@ -211,9 +211,7 @@ function UserInfo({ userId, userInfo }) {
                     onChange={handleFileChange} // 수정: handleUploadImage -> handleFileChange
                     disabled={isImageUploading}
                   />
-                  {/* 사용자에게 진행상황 보여주기 */}
-                  {isImageUploading && <p>이미지 업로드 중...</p>}{" "}
-                  {imageUrl && !isImageUploading && <p>이미지 업로드 완료!</p>}
+
                 </div>
                 <div>
                   <button type="button" onClick={() => setIsUpdating(false)}>
