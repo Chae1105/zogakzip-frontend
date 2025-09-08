@@ -24,6 +24,7 @@ export const createGroup = async (groupData) => {
   try {
     const result = await addDoc(collection(db, "groups"), {
       ...groupData,
+      memberCount: groupData.members.length,
       likeCount: 0,
       postCount: 0,
       createdAt: serverTimestamp(), // Firestore가 저장 순간의 서버 시간을 넣어줌
@@ -56,9 +57,13 @@ export const fetchGroupDetail = async (groupId) => {
 export const updateGroup = async (updateData, groupId) => {
   try {
     console.log("수정시작: ", groupId);
-    const result = await setDoc(doc(db, "groups", groupId), updateData, {
-      merge: true,
-    });
+    const result = await setDoc(
+      doc(db, "groups", groupId),
+      { ...updateData, memberCount: updateData.members.length },
+      {
+        merge: true,
+      }
+    );
     return result;
   } catch (err) {
     console.error("그룹 정보 수정 실패: ", err);
