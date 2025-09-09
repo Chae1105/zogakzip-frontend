@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
-import {
-  updateUser,
-} from "../services/userService";
+import { updateUser } from "../services/userService";
 import { auth } from "../firebase";
 import { deleteImage, uploadImage } from "../services/fileService";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import {
+  deleteGroup,
+  fetchGroupDetail,
+  updateGroup,
+} from "../services/groupService";
+import { deletePost } from "../services/postService";
 
-function UserInfo({ userId, userInfo }) {
+function UserInfo({ userId, userInfo, userGroupInfo, userPostInfo }) {
   console.log("UserInfo, userData: ", userInfo);
   const [user, setUser] = useState();
   const [email, setEmail] = useState("");
@@ -169,19 +173,49 @@ function UserInfo({ userId, userInfo }) {
   };
 
   // 유저 정보 삭제 (회원탈퇴)
-  const handleDeleteUser = async (e) => {
+  const handleDeleteUser = async () => {
+    const deleteUserGroup = async (groupsData) => {
+      for (const group of groupsData) {
+        if (group.createdBy === userId)
+          await deleteGroup(group.groupId, group.groupPassword, group);
+        else {
+          const newMember = group.members.filter(
+            (memberId) => memberId !== userId
+          );
+          console.log("새 멤버: ", newMember);
+          await updateGroup(
+            { ...group, members: newMember, memberCount: newMember.length },
+            group.groupId
+          );
+        }
+      }
+    };
+
+    const deleteUserPost = async (postData) => {
+      for (const post of postData) {
+        await deletePost(userId, post.groupId, post.postId, post);
+        const groupData = await fetchGroupDetail(post.groupId);
+        await updateGroup(
+          { ...groupData, postCount: groupData.postCount - 1 },
+          post.groupId
+        );
+      }
+    };
+
     try {
       setIsDeleting(true);
 
+      deleteUserGroup(userGroupInfo);
+      deleteUserPost(userPostInfo);
       await withDraw(inputPassword, user);
       alert("회원탈퇴가 완료되었습니다!");
-      
+
       navigate("/");
     } catch (err) {
       alert(err.message);
     } finally {
       setIsDeleteModalOpen(false);
-      isDeleting(false);
+      setIsDeleting(false);
       setInputPassword("");
     }
   };
@@ -211,7 +245,6 @@ function UserInfo({ userId, userInfo }) {
                     onChange={handleFileChange} // 수정: handleUploadImage -> handleFileChange
                     disabled={isImageUploading}
                   />
-
                 </div>
                 <div>
                   <button type="button" onClick={() => setIsUpdating(false)}>

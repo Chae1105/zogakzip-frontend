@@ -85,7 +85,10 @@ function GroupDetailPage() {
 
     try {
       await updateGroup(
-        { ...group, members: [...group.members, auth.currentUser.uid] },
+        {
+          ...group,
+          members: [...group.members, auth.currentUser.uid],
+        },
         groupId
       );
       setIsGroupMember(true);

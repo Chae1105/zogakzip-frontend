@@ -74,7 +74,7 @@ export const deletePost = async (userId, groupId, postId, postData) => {
       throw new Error("게시글을 삭제할 권한이 없습니다.");
     }
 
-    // 게시글 이미지가 있으면 storag에서 해당 파일 삭제
+    // 게시글 이미지가 있으면 storage에서 해당 파일 삭제
     if (postData.imageUrl) await deleteImage(postData.imageUrl);
     await deleteDoc(doc(db, "groups", groupId, "posts", postId));
     return true;
