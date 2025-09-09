@@ -32,21 +32,21 @@ function HomePage() {
       try {
         const likeQuerySnapshot = await getDocs(likeQuery);
         const likeQueryGroupsData = likeQuerySnapshot.docs.map((doc) => ({
-          id: doc.id,
+          groupId: doc.id,
           ...doc.data(),
         }));
         setTopLikedGroups(likeQueryGroupsData);
 
         const postQuerySnapshot = await getDocs(postQuery);
         const postQueryGroupsData = postQuerySnapshot.docs.map((doc) => ({
-          id: doc.id,
+          groupId: doc.id,
           ...doc.data(),
         }));
         setTopPostGroups(postQueryGroupsData);
 
         const memberQuerySnapshot = await getDocs(memberQuery);
         const memberQueryGroupsData = memberQuerySnapshot.docs.map((doc) => ({
-          id: doc.id,
+          groupId: doc.id,
           ...doc.data(),
         }));
         setTopMemberGroups(memberQueryGroupsData);
@@ -66,7 +66,7 @@ function HomePage() {
         <p>좋아요 Top 3</p>
         <div className="flex">
           {topLikedGroups.map((group) => (
-            <GroupCard key={group.id} groupInfo={group} />
+            <GroupCard key={group.groupId} groupInfo={group} />
           ))}
         </div>
       </div>
@@ -75,7 +75,7 @@ function HomePage() {
         <p>게시글 수 Top 3</p>
         <div className="flex">
           {topPostGroups.map((group) => (
-            <GroupCard key={group.id} groupInfo={group} />
+            <GroupCard key={group.groupId} groupInfo={group} />
           ))}
         </div>
       </div>
@@ -84,7 +84,7 @@ function HomePage() {
         <p>멤버 수 Top 3</p>
         <div className="flex">
           {topMemberGroups.map((group) => (
-            <GroupCard key={group.id} groupInfo={group} />
+            <GroupCard key={group.groupId} groupInfo={group} />
           ))}
         </div>
       </div>

@@ -24,7 +24,7 @@ function MyPage() {
   console.log("유저 아이디: ", userId);
   */
 
-  // fetchUserDeatil은 여기서 구현, 그 return 값인 userData를
+  // fetchUserDetail은 여기서 구현, 그 return 값인 userData를
   // 각각의 컴포넌트들에게 넘겨주기
   useEffect(() => {
     console.log("MyPage, useEffect 실행");
@@ -124,7 +124,14 @@ function MyPage() {
           내 게시글
         </button>
       </div>
-      {isUserInfoOpen && <UserInfo userId={user.uid} userInfo={userData} />}
+      {isUserInfoOpen && (
+        <UserInfo
+          userId={user.uid}
+          userInfo={userData}
+          userGroupInfo={userGroup}
+          userPostInfo={userPost}
+        />
+      )}
       {isUserGroupOpen &&
         userGroup.map((group) => (
           <GroupCard key={group.groupId} groupInfo={group} />
