@@ -82,7 +82,7 @@ function HomePage() {
 
       <div>
         <p>멤버 수 Top 3</p>
-        <div className="flex">
+        <div className="flex justify-between">
           {topMemberGroups.map((group) => (
             <GroupCard key={group.groupId} groupInfo={group} />
           ))}

@@ -10,14 +10,24 @@ function GroupCard({ groupInfo }) {
   };
 
   return (
-    <div onClick={navigateToDetail}>
+    <div
+      onClick={navigateToDetail}
+      className="flex-col w-80 h-60 bg-pink-200 border-2 hover:bg-pink-500 rounded-2xl "
+    >
       <img
         src={groupInfo.imageUrl || defaultImg}
         alt="그룹 대표 이미지"
-        className="w-32 h-32 object-contain"
+        className="w-full h-32 object-cover rounded-t-2xl"
       />
-      <h2>{groupInfo.groupName}</h2>
-      <h3>{groupInfo.introduction}</h3>
+      <p>{groupInfo.groupName}</p>
+      <p>{groupInfo.introduction}</p>
+      <div className="flex">
+        {groupInfo.tags.map((tag) => (
+          <div key={tag} className="flex">
+            <p># {tag}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
