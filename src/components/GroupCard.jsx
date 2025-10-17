@@ -18,6 +18,7 @@ function GroupCard({ groupInfo }) {
         src={groupInfo.imageUrl || defaultImg}
         alt="그룹 대표 이미지"
         className="w-full h-32 object-cover rounded-t-2xl"
+        loading="lazy"
       />
       <p>{groupInfo.groupName}</p>
       <p>{groupInfo.introduction}</p>

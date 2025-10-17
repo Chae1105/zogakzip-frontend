@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { deleteImage, uploadImage } from "../services/fileService";
 import { auth } from "../firebase";
+import imageCompression from "browser-image-compression";
 
 function CreateGroupPage() {
   // 이 페이지 들어오고 나서 새로고침을 하면 auth.currentUser.uid가 null이 됨
@@ -28,6 +29,7 @@ function CreateGroupPage() {
 
   const [isUploading, setIsUploading] = useState(false); // 이미지 파일 업로드 상태 관리
   const [isCreating, setIsCreating] = useState(false); // 그룹 생성 상태 관리
+  const [isCompressing, setIsCompressing] = useState(false); // 이미지 압축 상태
 
   const navigate = useNavigate(); // 그룹 생성 후 메인페이지 이동 (일단은)
 
@@ -100,8 +102,7 @@ function CreateGroupPage() {
   };
   // -> 좀 더 에러가 발생할 수 있는 상황을 고려해 try ..catch문과 조건문, 그리고 alert문도 추가
 
-  // 이미지 미리보기 함수
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) {
       setSelectedFile(null);
@@ -113,8 +114,28 @@ function CreateGroupPage() {
       alert("파일 크기는 5MB 이하여야 합니다. 다시 시도해주세요.");
       return;
     }
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
+
+    setIsCompressing(true);
+
+    // 이미지 파일 압축
+    try {
+      const compressedFile = await imageCompression(file, {
+        maxSizeMB: 0.3,
+        maxWidthOrHeight: 1920,
+      }); // 최대 300KB로
+
+      // 압축 확인
+      console.log("원본: ", file.size);
+      console.log("압축 후: ", compressedFile.size);
+      console.log("사용자 확인: ", auth.currentUser);
+
+      setSelectedFile(compressedFile); // 압축된 파일을 저장
+      setPreviewUrl(URL.createObjectURL(compressedFile));
+      setIsCompressing(false);
+    } catch (err) {
+      console.error("압축 실패: ", err);
+      alert("이미지 압축 처리 실패");
+    }
   };
 
   // 이미지 파일 업로드
@@ -189,6 +210,7 @@ function CreateGroupPage() {
           />
           {isUploading && <p>이미지 업로드 중... </p>}
           {imageUrl && <p>이미지 업로드 완료!</p>}
+          {isCompressing && <p>이미지 압축 중...</p>}
         </div>
         <div>
           <label>태그</label>

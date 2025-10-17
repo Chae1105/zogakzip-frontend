@@ -59,8 +59,7 @@ function HomePage() {
   }, []);
 
   return (
-    <div>
-      <p>메인 페이지</p>
+    <div className="container mx-auto px-20 pt-5">
       <Link to="/groups">게시글 전체 목록</Link>
       <div>
         <p>좋아요 Top 3</p>

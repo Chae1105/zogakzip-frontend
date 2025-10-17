@@ -170,11 +170,14 @@ function GroupDetailPage() {
       <button onClick={handleClickLike}>공감수 증가</button>
       <div>
         {group.imageUrl && (
-          <img
-            src={group.imageUrl}
-            alt="그룹 대표 이미지"
-            className="w-60 h-60 object-contain"
-          />
+          <section>
+            <img
+              src={group.imageUrl}
+              alt="그룹 대표 이미지"
+              className="w-60 h-60 object-contain"
+            />
+            <p>사진 사이즈: {group.imageUrl.size}</p>
+          </section>
         )}
         <h1>그룹 이름: {group.groupName}</h1>
         <p>그룹 소개: {group.introduction}</p>
